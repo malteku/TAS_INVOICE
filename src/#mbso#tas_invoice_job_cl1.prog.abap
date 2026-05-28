@@ -42,7 +42,6 @@ CLASS lcl_controller IMPLEMENTATION.
     "            FKSTA: A = nicht fakturiert, B = teilweise fakturiert.
     "            Vollständig fakturierte Positionen (C) werden ausgeblendet.
     "--------------------------------------------------------------------
-    " CA ist kein gültiger Open-SQL-Operator → OR-Bedingung verwenden
     SELECT vbeln, posnr, fksta
       FROM vbup
       FOR ALL ENTRIES IN @orders
@@ -53,25 +52,26 @@ CLASS lcl_controller IMPLEMENTATION.
 
     CHECK fksta_tab IS NOT INITIAL.
 
-    " Auftragspositionen auf fakturierfähige einschränken und Ergebnistyp
-    " befüllen – FKSTA wird direkt aus fksta_tab übernommen
-    " (Umbenennung von billing_status → fksta_tab vermeidet Namenskollision
-    "  mit dem gleichnamigen Komponentenfeld in ty_billing_item)
-    DATA(open_items) = VALUE ty_billing_items(
-      FOR order IN orders
-      WHERE ( line_exists( fksta_tab[ vbeln = order-vbeln
-                                      posnr = order-posnr ] ) )
-      ( sales_order    = order-vbeln
-        item           = order-posnr
-        material       = order-matnr
-        quantity       = order-kwmeng
-        unit           = order-vrkme
-        net_price      = order-netpr
-        currency       = order-waerk
-        customer       = order-kunnr
+    " Auftragspositionen auf fakturierfähige einschränken.
+    " line_exists() im FOR...WHERE nicht unterstützt → LOOP + CHECK.
+    DATA open_items TYPE ty_billing_items.
+    LOOP AT orders ASSIGNING FIELD-SYMBOL(<order>).
+      CHECK line_exists( fksta_tab[ vbeln = <order>-vbeln
+                                    posnr = <order>-posnr ] ).
+      APPEND VALUE ty_billing_item(
+        sales_order    = <order>-vbeln
+        item           = <order>-posnr
+        material       = <order>-matnr
+        quantity       = <order>-kwmeng
+        unit           = <order>-vrkme
+        net_price      = <order>-netpr
+        currency       = <order>-waerk
+        customer       = <order>-kunnr
         billing_status = VALUE #(
-          fksta_tab[ vbeln = order-vbeln
-                     posnr = order-posnr ]-fksta OPTIONAL ) ) ).
+          fksta_tab[ vbeln = <order>-vbeln
+                     posnr = <order>-posnr ]-fksta OPTIONAL )
+      ) TO open_items.
+    ENDLOOP.
 
     CHECK open_items IS NOT INITIAL.
 
@@ -166,11 +166,11 @@ CLASS lcl_controller IMPLEMENTATION.
     "
     " Nach erfolgreichem Aufruf: BAPI_TRANSACTION_COMMIT mit WAIT,
     " damit die Belege vor der ALV-Anzeige vollständig gebucht sind.
+    " Fehlerauswertung über RETURN (BAPIRET2), Typ 'E' und 'A'.
     "--------------------------------------------------------------------
     DATA billing_input   TYPE TABLE OF bapivbrk        WITH EMPTY KEY.
     DATA billing_success TYPE TABLE OF bapivbrksuccess WITH EMPTY KEY.
-    DATA billing_errors  TYPE TABLE OF bapivbrkerror   WITH EMPTY KEY.
-    DATA bapi_return     TYPE TABLE OF bapiret2         WITH EMPTY KEY.
+    DATA bapi_return     TYPE TABLE OF bapiret2        WITH EMPTY KEY.
 
     " Duplikatfreie Auftragsliste für den BAPI-Input aufbauen
     LOOP AT billing_items ASSIGNING FIELD-SYMBOL(<item>).
@@ -188,7 +188,6 @@ CLASS lcl_controller IMPLEMENTATION.
       TABLES
         billingdatain = billing_input
         success       = billing_success
-        errors        = billing_errors
         return        = bapi_return.
 
     IF billing_success IS NOT INITIAL.
@@ -198,21 +197,25 @@ CLASS lcl_controller IMPLEMENTATION.
       CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
     ENDIF.
 
-    " Fehlermeldungen als Warnungen in den Session-Log ausgeben
-    LOOP AT billing_errors ASSIGNING FIELD-SYMBOL(<error>).
-      MESSAGE |Auftrag { <error>-ref_doc }: { <error>-message }| TYPE 'W'.
+    " Fehlermeldungen (Typ E/A) aus RETURN-Tabelle als Warnungen ausgeben
+    DATA error_count TYPE i.
+    LOOP AT bapi_return ASSIGNING FIELD-SYMBOL(<ret>)
+      WHERE type = 'E' OR type = 'A'.
+      error_count += 1.
+      MESSAGE <ret>-message TYPE 'W'.
     ENDLOOP.
 
     " Erfolgreich fakturierte Positionen in der Ausgabeliste auf 'C' setzen
     LOOP AT billing_success ASSIGNING FIELD-SYMBOL(<success>).
+      DATA(ref_doc) = <success>-ref_doc.
       LOOP AT billing_items ASSIGNING FIELD-SYMBOL(<billing_item>)
-        WHERE sales_order = <success>-ref_doc.
+        WHERE sales_order = ref_doc.
         <billing_item>-billing_status = 'C'.
       ENDLOOP.
     ENDLOOP.
 
-    MESSAGE |{ lines( billing_success ) } Fakturabeleg(e) angelegt| &&
-            |, { lines( billing_errors ) } Fehler.| TYPE 'S'.
+    DATA(msg_text) = |{ lines( billing_success ) } Fakturabeleg(e) angelegt, { error_count } Fehler.|.
+    MESSAGE msg_text TYPE 'S'.
   ENDMETHOD.
 
 
