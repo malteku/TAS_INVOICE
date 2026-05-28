@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+    <PROGDIR>
+      <NAME>/MBSO/TAS_INVOICE_JOB_CL1</NAME>
+      <SUBC>I</SUBC>
+      <FIXPT>X</FIXPT>
+      <UCCHECK>X</UCCHECK>
+    </PROGDIR>
+  </asx:values>
+</asx:abap>
