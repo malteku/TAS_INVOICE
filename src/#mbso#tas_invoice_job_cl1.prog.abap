@@ -47,7 +47,7 @@ CLASS lcl_controller IMPLEMENTATION.
       FOR ALL ENTRIES IN @orders
       WHERE vbeln = @orders-vbeln
         AND posnr = @orders-posnr
-        AND ( fksta = 'A' OR fksta = 'B' )
+        AND ( fksaa = 'A' OR fksaa = 'B' )
       INTO TABLE @DATA(fksta_tab).
 
     CHECK fksta_tab IS NOT INITIAL.
@@ -178,6 +178,7 @@ CLASS lcl_controller IMPLEMENTATION.
         APPEND VALUE bapivbrk(
           ref_doc    = <item>-sales_order
           ref_doc_ca = 'C'
+          bill_date  = sy-datum
         ) TO billing_input.
       ENDIF.
     ENDLOOP.
@@ -192,7 +193,8 @@ CLASS lcl_controller IMPLEMENTATION.
 
     IF billing_success IS NOT INITIAL.
       CALL FUNCTION 'BAPI_TRANSACTION_COMMIT'
-        EXPORTING wait = abap_true.
+        EXPORTING
+          wait = abap_true.
     ELSE.
       CALL FUNCTION 'BAPI_TRANSACTION_ROLLBACK'.
     ENDIF.
