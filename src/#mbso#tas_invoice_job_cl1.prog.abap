@@ -119,7 +119,7 @@ CLASS lcl_controller IMPLEMENTATION.
         WITH KEY ebeln = <raw>-ebeln
                  ebelp = <raw>-ebelp.
       IF sy-subrc = 0.
-        <agg>-menge += <raw>-menge.
+        <agg>-menge = <agg>-menge + <raw>-menge.
       ELSE.
         APPEND VALUE #( ebeln = <raw>-ebeln
                         ebelp = <raw>-ebelp
