@@ -42,22 +42,25 @@ CLASS lcl_controller IMPLEMENTATION.
     "            FKSTA: A = nicht fakturiert, B = teilweise fakturiert.
     "            Vollständig fakturierte Positionen (C) werden ausgeblendet.
     "--------------------------------------------------------------------
+    " CA ist kein gültiger Open-SQL-Operator → OR-Bedingung verwenden
     SELECT vbeln, posnr, fksta
       FROM vbup
       FOR ALL ENTRIES IN @orders
       WHERE vbeln = @orders-vbeln
         AND posnr = @orders-posnr
-        AND fksta CA 'AB'
-      INTO TABLE @DATA(billing_status).
+        AND ( fksta = 'A' OR fksta = 'B' )
+      INTO TABLE @DATA(fksta_tab).
 
-    CHECK billing_status IS NOT INITIAL.
+    CHECK fksta_tab IS NOT INITIAL.
 
     " Auftragspositionen auf fakturierfähige einschränken und Ergebnistyp
-    " befüllen – FKSTA wird direkt aus billing_status übernommen
+    " befüllen – FKSTA wird direkt aus fksta_tab übernommen
+    " (Umbenennung von billing_status → fksta_tab vermeidet Namenskollision
+    "  mit dem gleichnamigen Komponentenfeld in ty_billing_item)
     DATA(open_items) = VALUE ty_billing_items(
       FOR order IN orders
-      WHERE ( line_exists( billing_status[ vbeln = order-vbeln
-                                           posnr = order-posnr ] ) )
+      WHERE ( line_exists( fksta_tab[ vbeln = order-vbeln
+                                      posnr = order-posnr ] ) )
       ( sales_order    = order-vbeln
         item           = order-posnr
         material       = order-matnr
@@ -67,8 +70,8 @@ CLASS lcl_controller IMPLEMENTATION.
         currency       = order-waerk
         customer       = order-kunnr
         billing_status = VALUE #(
-          billing_status[ vbeln = order-vbeln
-                          posnr = order-posnr ]-fksta OPTIONAL ) ) ).
+          fksta_tab[ vbeln = order-vbeln
+                     posnr = order-posnr ]-fksta OPTIONAL ) ) ).
 
     CHECK open_items IS NOT INITIAL.
 
