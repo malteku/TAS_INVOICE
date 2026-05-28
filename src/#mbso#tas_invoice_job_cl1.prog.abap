@@ -94,21 +94,23 @@ CLASS lcl_controller IMPLEMENTATION.
 
     "--------------------------------------------------------------------
     " Schritt 4: Wareneingänge (BEWTP = 'E') zur Streckenbestellung lesen.
-    "            Sortierung nach BUDAT DESCENDING: erster Treffer per
-    "            READ TABLE liefert den jüngsten Wareneingang.
+    "            SUM( menge ) = gesamte gelieferte Menge je Position.
+    "            MAX( budat ) = Datum des jüngsten Wareneingangs.
+    "            GROUP BY liefert genau eine Zeile je PO-Position.
     "--------------------------------------------------------------------
-    SELECT ebeln, ebelp, budat
+    SELECT ebeln, ebelp,
+           MAX( budat )  AS budat,
+           SUM( menge )  AS gr_quantity
       FROM ekbe
       FOR ALL ENTRIES IN @po_links
       WHERE ebeln = @po_links-ebeln
         AND ebelp = @po_links-ebelp
         AND bewtp = 'E'
         AND menge > 0
+      GROUP BY ebeln, ebelp
       INTO TABLE @DATA(goods_receipts).
 
     CHECK goods_receipts IS NOT INITIAL.
-
-    SORT goods_receipts BY ebeln ebelp budat DESCENDING.
 
     "--------------------------------------------------------------------
     " Schritt 5: Kundennamen aus KNA1
@@ -137,13 +139,14 @@ CLASS lcl_controller IMPLEMENTATION.
                  item        = <item>-item.
       CHECK sy-subrc = 0.
 
-      " Jüngster WE durch DESCENDING-Vorsortierung = erster Treffer
+      " GROUP BY liefert genau eine Zeile je PO-Position
       READ TABLE goods_receipts ASSIGNING FIELD-SYMBOL(<gr>)
         WITH KEY ebeln = <link>-ebeln
                  ebelp = <link>-ebelp.
       CHECK sy-subrc = 0.
 
       <item>-gr_date       = <gr>-budat.
+      <item>-gr_quantity   = <gr>-gr_quantity.
       <item>-po_number     = <link>-ebeln.
       <item>-po_item       = <link>-ebelp.
       <item>-customer_name = VALUE #(
@@ -160,8 +163,10 @@ CLASS lcl_controller IMPLEMENTATION.
     "--------------------------------------------------------------------
     " Fakturierung per BAPI_BILLINGDOC_CREATEMULTIPLE.
     "
-    " Eingabe: eine BAPIVBRK-Zeile je eindeutiger Auftragsnummer.
-    " SAP ermittelt intern alle fakturierfähigen Positionen des Auftrags.
+    " Eingabe: eine BAPIVBRK-Zeile je Auftragsposition (REF_ITEM gesetzt).
+    " So werden ausschließlich Positionen mit gebuchtem Wareneingang
+    " fakturiert – SAP ermittelt die offene Fakturamenge je Position
+    " selbst (geliefert minus bereits fakturiert).
     " REF_DOC_CA = 'C' kennzeichnet den Kundenauftrag als Referenzbeleg.
     "
     " Nach erfolgreichem Aufruf: BAPI_TRANSACTION_COMMIT mit WAIT,
@@ -172,15 +177,15 @@ CLASS lcl_controller IMPLEMENTATION.
     DATA billing_success TYPE TABLE OF bapivbrksuccess WITH EMPTY KEY.
     DATA bapi_return     TYPE TABLE OF bapiret2        WITH EMPTY KEY.
 
-    " Duplikatfreie Auftragsliste für den BAPI-Input aufbauen
+    " Je Auftragsposition eine BAPI-Eingabezeile – REF_ITEM steuert,
+    " welche Positionen fakturiert werden (nur solche mit WE)
     LOOP AT billing_items ASSIGNING FIELD-SYMBOL(<item>).
-      IF NOT line_exists( billing_input[ ref_doc = <item>-sales_order ] ).
-        APPEND VALUE bapivbrk(
-          ref_doc    = <item>-sales_order
-          ref_doc_ca = 'C'
-          bill_date  = sy-datum
-        ) TO billing_input.
-      ENDIF.
+      APPEND VALUE bapivbrk(
+        ref_doc    = <item>-sales_order
+        ref_doc_ca = 'C'
+        ref_item   = <item>-item
+        bill_date  = sy-datum
+      ) TO billing_input.
     ENDLOOP.
 
     CHECK billing_input IS NOT INITIAL.
@@ -291,6 +296,11 @@ CLASS lcl_controller IMPLEMENTATION.
         col->set_long_text( 'Wareneingangsdatum' ).
         col->set_medium_text( 'WE-Datum' ).
 
+        col = columns->get_column( 'GR_QUANTITY' ).
+        col->set_long_text( 'Gelieferte Menge' ).
+        col->set_medium_text( 'Gelief. Mg.' ).
+        col->set_short_text( 'Gel.Mg.' ).
+
         col = columns->get_column( 'PO_NUMBER' ).
         col->set_long_text( 'Streckenbestellung' ).
         col->set_medium_text( 'Bestellung' ).
@@ -313,6 +323,9 @@ CLASS lcl_controller IMPLEMENTATION.
         DATA(aggregations) = salv->get_aggregations( ).
         aggregations->add_aggregation(
           columnname  = 'QUANTITY'
+          aggregation = if_salv_c_aggregation=>total ).
+        aggregations->add_aggregation(
+          columnname  = 'GR_QUANTITY'
           aggregation = if_salv_c_aggregation=>total ).
         aggregations->add_aggregation(
           columnname  = 'NET_PRICE'

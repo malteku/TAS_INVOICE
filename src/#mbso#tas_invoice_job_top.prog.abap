@@ -16,6 +16,7 @@ TYPES:
     customer       TYPE vbak-kunnr,
     customer_name  TYPE kna1-name1,
     gr_date        TYPE ekbe-budat,
+    gr_quantity    TYPE ekbe-menge,
     po_number      TYPE ekbe-ebeln,
     po_item        TYPE ekbe-ebelp,
     billing_status TYPE vbup-fksta,
