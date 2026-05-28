@@ -94,21 +94,39 @@ CLASS lcl_controller IMPLEMENTATION.
 
     "--------------------------------------------------------------------
     " Schritt 4: Wareneingänge (BEWTP = 'E') zur Streckenbestellung lesen.
-    "            SUM( menge ) = gesamte gelieferte Menge je Position.
-    "            MAX( budat ) = Datum des jüngsten Wareneingangs.
-    "            GROUP BY liefert genau eine Zeile je PO-Position.
+    "            GROUP BY ist mit FOR ALL ENTRIES nicht erlaubt →
+    "            Rohdaten lesen, dann in ABAP aggregieren:
+    "            Summenmenge je PO-Position + jüngstes Wareneingangsdatum.
     "--------------------------------------------------------------------
-    SELECT ebeln, ebelp,
-           MAX( budat )  AS budat,
-           SUM( menge )  AS gr_quantity
+    SELECT ebeln, ebelp, budat, menge
       FROM ekbe
       FOR ALL ENTRIES IN @po_links
       WHERE ebeln = @po_links-ebeln
         AND ebelp = @po_links-ebelp
         AND bewtp = 'E'
         AND menge > 0
-      GROUP BY ebeln, ebelp
-      INTO TABLE @DATA(goods_receipts).
+      INTO TABLE @DATA(gr_raw).
+
+    CHECK gr_raw IS NOT INITIAL.
+
+    SORT gr_raw BY ebeln ebelp budat DESCENDING.
+
+    " Eine Ergebniszeile je PO-Position: Menge aufsummieren,
+    " jüngstes Datum durch DESCENDING-Vorsortierung = erster Treffer
+    DATA goods_receipts LIKE gr_raw.
+    LOOP AT gr_raw ASSIGNING FIELD-SYMBOL(<raw>).
+      READ TABLE goods_receipts ASSIGNING FIELD-SYMBOL(<agg>)
+        WITH KEY ebeln = <raw>-ebeln
+                 ebelp = <raw>-ebelp.
+      IF sy-subrc = 0.
+        <agg>-menge += <raw>-menge.
+      ELSE.
+        APPEND VALUE #( ebeln = <raw>-ebeln
+                        ebelp = <raw>-ebelp
+                        budat = <raw>-budat
+                        menge = <raw>-menge ) TO goods_receipts.
+      ENDIF.
+    ENDLOOP.
 
     CHECK goods_receipts IS NOT INITIAL.
 
@@ -146,7 +164,7 @@ CLASS lcl_controller IMPLEMENTATION.
       CHECK sy-subrc = 0.
 
       <item>-gr_date       = <gr>-budat.
-      <item>-gr_quantity   = <gr>-gr_quantity.
+      <item>-gr_quantity   = <gr>-menge.
       <item>-po_number     = <link>-ebeln.
       <item>-po_item       = <link>-ebelp.
       <item>-customer_name = VALUE #(
