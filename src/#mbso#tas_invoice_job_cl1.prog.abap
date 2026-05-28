@@ -201,7 +201,7 @@ CLASS lcl_controller IMPLEMENTATION.
     DATA error_count TYPE i.
     LOOP AT bapi_return ASSIGNING FIELD-SYMBOL(<ret>)
       WHERE type = 'E' OR type = 'A'.
-      error_count += 1.
+      error_count = error_count + 1.
       MESSAGE <ret>-message TYPE 'W'.
     ENDLOOP.
 
