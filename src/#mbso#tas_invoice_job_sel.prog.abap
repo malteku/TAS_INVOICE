@@ -9,9 +9,14 @@
 *    TEXT-m01 = 'Keine fakturierfähigen Streckenaufträge im gewählten Zeitraum'
 *----------------------------------------------------------------------
 
+" Referenzfelder für SELECT-OPTIONS – direkte Tabellenfeldreferenz
+" wird im Include-Kontext nicht aufgelöst (Compiler-Einschränkung)
+DATA: ref_vkorg TYPE vkorg,
+      ref_audat TYPE dats.
+
 SELECTION-SCREEN BEGIN OF BLOCK criteria WITH FRAME TITLE TEXT-001.
-  SELECT-OPTIONS so_vkorg FOR vbak-vkorg OBLIGATORY.
-  SELECT-OPTIONS so_date  FOR vbak-audat.
+  SELECT-OPTIONS so_vkorg FOR ref_vkorg OBLIGATORY.
+  SELECT-OPTIONS so_date  FOR ref_audat.
   PARAMETERS     simulate TYPE abap_bool AS CHECKBOX DEFAULT 'X'.
 SELECTION-SCREEN END OF BLOCK criteria.
 
