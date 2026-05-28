@@ -1,60 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
-  <asx:values>
-    <PROGDIR>
-      <NAME>/MBSO/TAS_INVOICE_JOB</NAME>
-      <SUBC>1</SUBC>
-      <FIXPT>X</FIXPT>
-      <UCCHECK>X</UCCHECK>
-    </PROGDIR>
-    <TPOOL>
-      <item>
-        <ID>R</ID>
-        <ENTRY>/MBSO/TAS_INVOICE_JOB</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>T</ID>
-        <KEY>001</KEY>
-        <ENTRY>Streckenaufträge fakturieren</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>T</ID>
-        <KEY>H01</KEY>
-        <ENTRY>SIMULATION - fakturierfähige Streckenaufträge (keine Buchung)</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>T</ID>
-        <KEY>H02</KEY>
-        <ENTRY>Streckenaufträge - Fakturierung durchgeführt</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>T</ID>
-        <KEY>M01</KEY>
-        <ENTRY>Keine fakturierfähigen Streckenaufträge im gewählten Zeitraum</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>S</ID>
-        <KEY>SO_VKORG</KEY>
-        <ENTRY>Verkaufsorganisation</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>S</ID>
-        <KEY>SO_DATE</KEY>
-        <ENTRY>Auftragsdatum von/bis</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-      <item>
-        <ID>S</ID>
-        <KEY>SIMULATE</KEY>
-        <ENTRY>Simulieren</ENTRY>
-        <LENGTH>0</LENGTH>
-      </item>
-    </TPOOL>
-  </asx:values>
+ <asx:values>
+  <PROGDIR>
+   <NAME>/MBSO/TAS_INVOICE_JOB</NAME>
+   <DBAPL>S</DBAPL>
+   <DBNA>D$</DBNA>
+   <SUBC>1</SUBC>
+   <APPL>S</APPL>
+   <FIXPT>X</FIXPT>
+   <LDBNAME>D$S</LDBNAME>
+   <UCCHECK>X</UCCHECK>
+  </PROGDIR>
+ </asx:values>
 </asx:abap>
