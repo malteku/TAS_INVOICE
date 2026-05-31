@@ -1,5 +1,6 @@
 import Foundation
 import HealthKit
+import CoreLocation
 
 @MainActor
 class HealthKitService: ObservableObject {
@@ -229,6 +230,64 @@ class HealthKitService: ObservableObject {
             weekly[week, default: 0] += tss
         }
         return weekly.sorted { $0.key < $1.key }.map(\.value)
+    }
+}
+
+    // MARK: - Workout-Route (GPS)
+
+    func fetchWorkoutRoute(workoutID: UUID) async throws -> [CLLocation] {
+        // Schritt 1: HKWorkout via UUID suchen
+        let hkWorkout: HKWorkout = try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKObjectType.workoutType(),
+                predicate: HKQuery.predicateForObject(with: workoutID),
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, error in
+                if let error { continuation.resume(throwing: error); return }
+                guard let workout = (samples as? [HKWorkout])?.first else {
+                    continuation.resume(throwing: HealthError.noData); return
+                }
+                continuation.resume(returning: workout)
+            }
+            store.execute(query)
+        }
+
+        // Schritt 2: HKWorkoutRoute für dieses Workout laden
+        let routes: [HKWorkoutRoute] = try await withCheckedThrowingContinuation { continuation in
+            let query = HKSampleQuery(
+                sampleType: HKSeriesType.workoutRoute(),
+                predicate: HKQuery.predicateForObjects(from: hkWorkout),
+                limit: 1,
+                sortDescriptors: nil
+            ) { _, samples, error in
+                if let error { continuation.resume(throwing: error); return }
+                continuation.resume(returning: (samples as? [HKWorkoutRoute]) ?? [])
+            }
+            store.execute(query)
+        }
+
+        guard let route = routes.first else { throw HealthError.noData }
+
+        // Schritt 3: CLLocation-Array aus Route lesen (Callback kann mehrfach kommen)
+        return try await withCheckedThrowingContinuation { continuation in
+            var locations: [CLLocation] = []
+            var finished = false
+            let query = HKWorkoutRouteQuery(route: route) { _, batch, done, error in
+                guard !finished else { return }
+                if let error {
+                    finished = true
+                    continuation.resume(throwing: error)
+                    return
+                }
+                if let batch { locations.append(contentsOf: batch) }
+                if done {
+                    finished = true
+                    continuation.resume(returning: locations)
+                }
+            }
+            store.execute(query)
+        }
     }
 }
 

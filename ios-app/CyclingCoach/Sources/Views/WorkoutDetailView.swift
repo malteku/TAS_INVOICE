@@ -4,6 +4,7 @@ struct WorkoutDetailView: View {
 
     let workout: CyclingWorkout
     @EnvironmentObject var aiVM: AIAnalysisViewModel
+    @State private var showExport = false
 
     var body: some View {
         ScrollView {
@@ -19,6 +20,18 @@ struct WorkoutDetailView: View {
         }
         .navigationTitle(workout.date.formatted(date: .long, time: .omitted))
         .navigationBarTitleDisplayMode(.inline)
+        .toolbar {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    showExport = true
+                } label: {
+                    Image(systemName: "square.and.arrow.up")
+                }
+            }
+        }
+        .sheet(isPresented: $showExport) {
+            WorkoutExportView(workout: workout)
+        }
     }
 
     private var headerCard: some View {

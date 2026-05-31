@@ -32,6 +32,10 @@
 		B1000014 /* ChatModels.swift in Sources */                = {isa = PBXBuildFile; fileRef = A1000014; };
 		B1000015 /* ChatViewModel.swift in Sources */             = {isa = PBXBuildFile; fileRef = A1000015; };
 		B1000016 /* ChatView.swift in Sources */                  = {isa = PBXBuildFile; fileRef = A1000016; };
+		B1000017 /* ShareTheme.swift in Sources */                = {isa = PBXBuildFile; fileRef = A1000017; };
+		B1000018 /* WorkoutExportViewModel.swift in Sources */    = {isa = PBXBuildFile; fileRef = A1000018; };
+		B1000019 /* WorkoutShareCardView.swift in Sources */      = {isa = PBXBuildFile; fileRef = A1000019; };
+		B1000020 /* WorkoutExportView.swift in Sources */         = {isa = PBXBuildFile; fileRef = A1000020; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -51,6 +55,10 @@
 		A1000014 /* ChatModels.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/ChatModels.swift"; sourceTree = "<group>"; };
 		A1000015 /* ChatViewModel.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/ViewModels/ChatViewModel.swift"; sourceTree = "<group>"; };
 		A1000016 /* ChatView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/ChatView.swift"; sourceTree = "<group>"; };
+		A1000017 /* ShareTheme.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/ShareTheme.swift"; sourceTree = "<group>"; };
+		A1000018 /* WorkoutExportViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/ViewModels/WorkoutExportViewModel.swift"; sourceTree = "<group>"; };
+		A1000019 /* WorkoutShareCardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutShareCardView.swift"; sourceTree = "<group>"; };
+		A1000020 /* WorkoutExportView.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutExportView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,7 +76,7 @@
 			children = (A1000001, A1000002, A1000003, A1000004, A1000005,
 			            A1000006, A1000007, A1000008, A1000009, A1000010,
 			            A1000011, A1000012, A1000013, A1000014, A1000015,
-			            A1000016);
+			            A1000016, A1000017, A1000018, A1000019, A1000020);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
