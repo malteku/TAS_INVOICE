@@ -19,7 +19,6 @@ class HealthKitService: ObservableObject {
         HKQuantityType(.cyclingCadence),
         HKQuantityType(.cyclingPower),
         HKQuantityType(.cyclingSpeed),
-        HKQuantityType(.flightsClimbed),
         HKQuantityType(.bodyMass),
         HKQuantityType(.restingHeartRate),
         HKQuantityType(.vo2Max),
@@ -77,8 +76,9 @@ class HealthKitService: ObservableObject {
         let calories = workout.statistics(for: HKQuantityType(.activeEnergyBurned))?
             .sumQuantity()?.doubleValue(for: .kilocalorie()) ?? 0
 
-        let elevation = workout.statistics(for: HKQuantityType(.flightsClimbed))?
-            .sumQuantity()?.doubleValue(for: .count())
+        // Korrekte Quelle für Höhenmeter: Workout-Metadata (von GPS-Geräten wie Garmin/Apple Watch)
+        let elevationM = (workout.metadata?[HKMetadataKeyElevationAscended] as? HKQuantity)?
+            .doubleValue(for: .meter())
 
         let duration = workout.duration
         let avgSpeed = duration > 0 ? (distance / (duration / 3600)) : 0
@@ -95,7 +95,7 @@ class HealthKitService: ObservableObject {
             avgPower: powerStats?.averageQuantity()?.doubleValue(for: .watt()),
             maxPower: powerStats?.maximumQuantity()?.doubleValue(for: .watt()),
             avgCadence: cadenceStats?.averageQuantity()?.doubleValue(for: .count().unitDivided(by: .minute())),
-            elevationGainM: elevation.map { $0 * 3 },  // Näherung: 1 Etage ≈ 3m
+            elevationGainM: elevationM,
             calories: calories,
             avgSpeedKmh: avgSpeed,
             source: source
@@ -126,52 +126,36 @@ class HealthKitService: ObservableObject {
     // MARK: - Körperdaten
 
     func fetchLatestBodyMass() async -> Double? {
-        let type = HKQuantityType(.bodyMass)
-        return await withCheckedContinuation { continuation in
-            let query = HKSampleQuery(
-                sampleType: type,
-                predicate: nil,
-                limit: 1,
-                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
-            ) { _, samples, _ in
-                let kg = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: .gramUnit(with: .kilo))
-                continuation.resume(returning: kg)
-            }
-            store.execute(query)
-        }
+        await fetchLatestQuantity(.bodyMass, unit: .gramUnit(with: .kilo))
     }
 
     func fetchRestingHeartRate() async -> Double? {
-        let type = HKQuantityType(.restingHeartRate)
-        return await withCheckedContinuation { continuation in
-            let query = HKSampleQuery(
-                sampleType: type,
-                predicate: nil,
-                limit: 1,
-                sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
-            ) { _, samples, _ in
-                let bpm = (samples?.first as? HKQuantitySample)?
-                    .quantity.doubleValue(for: .count().unitDivided(by: .minute()))
-                continuation.resume(returning: bpm)
-            }
-            store.execute(query)
-        }
+        await fetchLatestQuantity(.restingHeartRate, unit: .count().unitDivided(by: .minute()))
     }
 
     func fetchVO2Max() async -> Double? {
-        let type = HKQuantityType(.vo2Max)
         let unit = HKUnit.literUnit(with: .milli)
-            .unitDivided(by: HKUnit.gramUnit(with: .kilo)
-            .unitMultiplied(by: HKUnit.minute()))
+            .unitDivided(by: HKUnit.gramUnit(with: .kilo).unitMultiplied(by: HKUnit.minute()))
+        return await fetchLatestQuantity(.vo2Max, unit: unit)
+    }
+
+    private func fetchLatestQuantity(_ identifier: HKQuantityTypeIdentifier, unit: HKUnit) async -> Double? {
+        let type = HKQuantityType(identifier)
         return await withCheckedContinuation { continuation in
             let query = HKSampleQuery(
                 sampleType: type,
                 predicate: nil,
                 limit: 1,
                 sortDescriptors: [NSSortDescriptor(key: HKSampleSortIdentifierStartDate, ascending: false)]
-            ) { _, samples, _ in
-                let vo2 = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: unit)
-                continuation.resume(returning: vo2)
+            ) { _, samples, error in
+                if error != nil {
+                    // Auth entzogen oder kein Zugriff → isAuthorized zurücksetzen
+                    Task { @MainActor in self.isAuthorized = false }
+                    continuation.resume(returning: nil)
+                    return
+                }
+                let value = (samples?.first as? HKQuantitySample)?.quantity.doubleValue(for: unit)
+                continuation.resume(returning: value)
             }
             store.execute(query)
         }

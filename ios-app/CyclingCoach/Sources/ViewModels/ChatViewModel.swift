@@ -63,10 +63,12 @@ class ChatViewModel: ObservableObject {
             let history = conversations[idx].messages.dropLast().map { $0 }
             let reply = try await claude.sendChatMessage(text, history: history, systemPrompt: system)
 
+            // Nach dem await neu suchen – User könnte die Konversation inzwischen gelöscht haben
+            guard let currentIdx = conversationIndex() else { return }
             let assistantMsg = ChatMessage(role: .assistant, content: reply)
-            conversations[idx].messages.append(assistantMsg)
-            conversations[idx].updatedAt = Date()
-            activeConversation = conversations[idx]
+            conversations[currentIdx].messages.append(assistantMsg)
+            conversations[currentIdx].updatedAt = Date()
+            activeConversation = conversations[currentIdx]
             saveConversations()
         } catch {
             self.error = error.localizedDescription

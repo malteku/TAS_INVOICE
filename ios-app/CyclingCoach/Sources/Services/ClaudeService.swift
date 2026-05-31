@@ -172,7 +172,10 @@ class ClaudeService: ObservableObject {
         isLoading = true
         defer { isLoading = false }
 
-        var request = URLRequest(url: URL(string: baseURL)!)
+        guard let url = URL(string: baseURL) else {
+            throw ClaudeError.networkError("Ungültige API-URL")
+        }
+        var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
