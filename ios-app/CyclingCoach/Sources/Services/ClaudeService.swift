@@ -16,6 +16,7 @@ class ClaudeService: ObservableObject {
 
     @Published var isLoading = false
     @Published var error: String?
+    @Published var usageStats = APIUsageStats.load()
 
     private var apiKey: String {
         UserDefaults.standard.string(forKey: "claudeApiKey") ?? ""
@@ -210,7 +211,16 @@ class ClaudeService: ObservableObject {
         }
 
         let decoded = try JSONDecoder().decode(ClaudeResponse.self, from: data)
+        if let usage = decoded.usage {
+            usageStats.record(inputTokens: usage.inputTokens, outputTokens: usage.outputTokens)
+            usageStats.save()
+        }
         return decoded.content.first?.text ?? ""
+    }
+
+    func resetUsage() {
+        usageStats = APIUsageStats()
+        usageStats.save()
     }
 
     // MARK: - Prompt Builder
@@ -241,9 +251,60 @@ class ClaudeService: ObservableObject {
 
 private struct ClaudeResponse: Decodable {
     let content: [ContentBlock]
+    let usage: UsageInfo?
+
     struct ContentBlock: Decodable {
         let type: String
         let text: String
+    }
+
+    struct UsageInfo: Decodable {
+        let inputTokens: Int
+        let outputTokens: Int
+        enum CodingKeys: String, CodingKey {
+            case inputTokens  = "input_tokens"
+            case outputTokens = "output_tokens"
+        }
+    }
+}
+
+// MARK: - Usage Tracking
+
+struct APIUsageStats: Codable {
+    var totalInputTokens:  Int  = 0
+    var totalOutputTokens: Int  = 0
+    var callCount:         Int  = 0
+    var firstCallDate:     Date?
+    var lastCallDate:      Date?
+
+    static let inputCostPerMillion:  Double = 3.0
+    static let outputCostPerMillion: Double = 15.0
+
+    var estimatedCostUSD: Double {
+        Double(totalInputTokens)  / 1_000_000 * Self.inputCostPerMillion +
+        Double(totalOutputTokens) / 1_000_000 * Self.outputCostPerMillion
+    }
+
+    mutating func record(inputTokens: Int, outputTokens: Int) {
+        totalInputTokens  += inputTokens
+        totalOutputTokens += outputTokens
+        callCount         += 1
+        if firstCallDate == nil { firstCallDate = Date() }
+        lastCallDate = Date()
+    }
+
+    func save() {
+        if let data = try? JSONEncoder().encode(self) {
+            UserDefaults.standard.set(data, forKey: "apiUsageStats")
+        }
+    }
+
+    static func load() -> APIUsageStats {
+        guard let data = UserDefaults.standard.data(forKey: "apiUsageStats"),
+              let stats = try? JSONDecoder().decode(APIUsageStats.self, from: data) else {
+            return APIUsageStats()
+        }
+        return stats
     }
 }
 
