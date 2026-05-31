@@ -126,6 +126,32 @@ enum ShareFormat: String, CaseIterable {
     }
 }
 
+// MARK: - Background Mode
+
+enum CardBackgroundMode: String, CaseIterable, Identifiable {
+    case gradient = "Gradient"
+    case map      = "Karte"
+    case photo    = "Foto"
+
+    var id: String { rawValue }
+
+    var icon: String {
+        switch self {
+        case .gradient: return "paintpalette.fill"
+        case .map:      return "map.fill"
+        case .photo:    return "photo.fill"
+        }
+    }
+
+    var hint: String {
+        switch self {
+        case .gradient: return "Farbiger Hintergrund mit Route"
+        case .map:      return "Satellitenkarte aus GPS-Daten"
+        case .photo:    return "Eigenes Foto aus der Bibliothek"
+        }
+    }
+}
+
 // MARK: - Color Helper
 
 extension Color {
@@ -136,4 +162,10 @@ extension Color {
             blue:  Double(b) / 255
         )
     }
+}
+
+extension ShareTheme {
+    // Für UIKit-Zeichnung (MKMapSnapshotter Route)
+    var routeUIColor: UIColor { UIColor(routeColor) }
+    var glowUIColor:  UIColor { UIColor(glowColor)  }
 }

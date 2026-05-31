@@ -4,32 +4,35 @@ import SwiftUI
 // Kein GeometryReader, keine Environment-Abhängigkeiten.
 struct WorkoutShareCardView: View {
 
-    let workout: CyclingWorkout
-    let routePoints: [CGPoint]
-    let theme: ShareTheme
-    let format: ShareFormat
+    let workout:         CyclingWorkout
+    let routePoints:     [CGPoint]
+    let theme:           ShareTheme
+    let format:          ShareFormat
+    let backgroundMode:  CardBackgroundMode
+    let backgroundImage: UIImage?          // nil = Gradient-Fallback
 
     private var size: CGSize { format.pointSize }
 
     var body: some View {
         ZStack(alignment: .bottom) {
-            // Hintergrund
-            theme.background
-                .frame(width: size.width, height: size.height)
+            // 1. Hintergrund (Gradient / Satellitenbild / Foto)
+            backgroundLayer
 
-            // Route-Bereich
-            routeCanvas
-                .frame(width: size.width, height: size.height * format.routeHeightRatio)
-                .frame(width: size.width, height: size.height, alignment: .top)
+            // 2. Route-Canvas (nur bei Gradient + Foto; bei Karte ist Route ins Bild gebacken)
+            if backgroundMode != .map {
+                routeCanvas
+                    .frame(width: size.width, height: size.height * format.routeHeightRatio)
+                    .frame(width: size.width, height: size.height, alignment: .top)
+            }
 
-            // Subtiler Vignette-Rand
-            vignetteOverlay
+            // 3. Abdunklungs-Gradient am unteren Rand für Lesbarkeit
+            bottomFade
 
-            // Stats-Panel unten
+            // 4. Stats-Panel
             statsPanel
                 .frame(width: size.width)
 
-            // Header oben
+            // 5. Header
             headerBar
                 .frame(width: size.width)
                 .frame(width: size.width, height: size.height, alignment: .top)
@@ -38,81 +41,90 @@ struct WorkoutShareCardView: View {
         .clipShape(RoundedRectangle(cornerRadius: format == .story ? 0 : 20))
     }
 
-    // MARK: - Route Canvas
+    // MARK: - Hintergrund
+
+    @ViewBuilder
+    private var backgroundLayer: some View {
+        if let img = backgroundImage {
+            Image(uiImage: img)
+                .resizable()
+                .scaledToFill()
+                .frame(width: size.width, height: size.height)
+                .clipped()
+        } else {
+            theme.background
+                .frame(width: size.width, height: size.height)
+        }
+    }
+
+    // MARK: - Route Canvas (Gradient- und Foto-Modus)
 
     private var routeCanvas: some View {
         Canvas { ctx, canvasSize in
             guard routePoints.count > 1 else {
-                // Kein GPS → abstrakte Wellenform zeichnen
                 drawAbstractWave(ctx: ctx, size: canvasSize)
                 return
             }
 
             var path = Path()
             path.move(to: routePoints[0])
-            for pt in routePoints.dropFirst() {
-                path.addLine(to: pt)
-            }
+            routePoints.dropFirst().forEach { path.addLine(to: $0) }
 
-            // Äußerer Glow (breit, transparent)
+            // 3-stufiger Glow
             ctx.stroke(path,
                        with: .color(theme.glowColor),
                        style: StrokeStyle(lineWidth: 10, lineCap: .round, lineJoin: .round))
-
-            // Mittlerer Glow
             ctx.stroke(path,
                        with: .color(theme.routeColor.opacity(0.45)),
-                       style: StrokeStyle(lineWidth: 5, lineCap: .round, lineJoin: .round))
-
-            // Kernlinie
+                       style: StrokeStyle(lineWidth: 5,  lineCap: .round, lineJoin: .round))
             ctx.stroke(path,
                        with: .color(theme.routeColor),
                        style: StrokeStyle(lineWidth: 2.2, lineCap: .round, lineJoin: .round))
 
             // Start-Punkt
-            let startRect = CGRect(x: routePoints[0].x - 5, y: routePoints[0].y - 5, width: 10, height: 10)
-            ctx.fill(Path(ellipseIn: startRect), with: .color(theme.routeColor))
+            ctx.fill(Path(ellipseIn: CGRect(x: routePoints[0].x - 5,
+                                            y: routePoints[0].y - 5,
+                                            width: 10, height: 10)),
+                     with: .color(theme.routeColor))
 
             // End-Punkt
             if let last = routePoints.last {
-                let endRect = CGRect(x: last.x - 4, y: last.y - 4, width: 8, height: 8)
-                ctx.fill(Path(ellipseIn: endRect), with: .color(theme.routeColor.opacity(0.7)))
+                ctx.fill(Path(ellipseIn: CGRect(x: last.x - 4, y: last.y - 4,
+                                                width: 8, height: 8)),
+                         with: .color(theme.routeColor.opacity(0.7)))
             }
         }
         .allowsHitTesting(false)
     }
 
     private func drawAbstractWave(ctx: GraphicsContext, size: CGSize) {
-        // Artistischer Platzhalter wenn kein GPS vorhanden (Indoor-Trainer)
         let amplitude = size.height * 0.25
         let midY      = size.height * 0.5
         var path = Path()
         path.move(to: CGPoint(x: 0, y: midY))
-        for x in stride(from: 0.0, through: Double(size.width), by: 2.0) {
-            let progress = x / Double(size.width)
-            let y = midY + amplitude * CGFloat(sin(progress * .pi * 5))
-                         + amplitude * 0.4 * CGFloat(sin(progress * .pi * 11))
+        stride(from: 0.0, through: Double(size.width), by: 2.0).forEach { x in
+            let t = x / Double(size.width)
+            let y = midY + amplitude * CGFloat(sin(t * .pi * 5))
+                         + amplitude * 0.4 * CGFloat(sin(t * .pi * 11))
             path.addLine(to: CGPoint(x: x, y: y))
         }
-        ctx.stroke(path,
-                   with: .color(theme.glowColor),
+        ctx.stroke(path, with: .color(theme.glowColor),
                    style: StrokeStyle(lineWidth: 8, lineCap: .round))
-        ctx.stroke(path,
-                   with: .color(theme.routeColor),
+        ctx.stroke(path, with: .color(theme.routeColor),
                    style: StrokeStyle(lineWidth: 2.5, lineCap: .round))
     }
 
-    // MARK: - Vignette
+    // MARK: - Abdunklungs-Gradient
 
-    private var vignetteOverlay: some View {
-        Rectangle()
-            .fill(
-                LinearGradient(
-                    colors: [.clear, .clear, theme.backgroundGradient.last?.opacity(0.7) ?? .black.opacity(0.7)],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-            )
+    private var bottomFade: some View {
+        // Bei Foto/Karte dunklerer Übergang für sicheren Kontrast
+        let intensity: CGFloat = backgroundImage != nil ? 0.85 : 0.65
+        return Rectangle()
+            .fill(LinearGradient(
+                colors: [.clear, .clear, .black.opacity(intensity)],
+                startPoint: .top,
+                endPoint:   .bottom
+            ))
             .frame(width: size.width, height: size.height)
             .allowsHitTesting(false)
     }
@@ -121,9 +133,8 @@ struct WorkoutShareCardView: View {
 
     private var statsPanel: some View {
         VStack(spacing: 0) {
-            // Trennlinie mit Route-Farbe
             Rectangle()
-                .fill(theme.routeColor.opacity(0.6))
+                .fill(theme.routeColor.opacity(0.7))
                 .frame(height: 1.5)
 
             VStack(spacing: format == .story ? 12 : 8) {
@@ -132,13 +143,16 @@ struct WorkoutShareCardView: View {
             }
             .padding(.horizontal, 20)
             .padding(.vertical, format == .story ? 16 : 10)
-            .background(theme.panelBackground)
+            .background(
+                backgroundImage != nil
+                    ? Color.black.opacity(0.55)    // Bild-Modi: stärker abdunkeln
+                    : theme.panelBackground
+            )
         }
     }
 
     private var statsGrid: some View {
         let cols = format == .story ? 3 : 4
-
         return LazyVGrid(
             columns: Array(repeating: GridItem(.flexible()), count: cols),
             spacing: format == .story ? 14 : 10
@@ -164,7 +178,6 @@ struct WorkoutShareCardView: View {
                 } else if let hr = workout.avgHeartRate, workout.elevationGainM != nil {
                     StatCell(value: "\(Int(hr))", unit: "bpm", label: "Ø Herzfrq.", theme: theme)
                 }
-
                 if let cal = workout.calories {
                     StatCell(value: "\(Int(cal))", unit: "kcal", label: "Kalorien", theme: theme)
                 }
@@ -174,45 +187,35 @@ struct WorkoutShareCardView: View {
 
     private var footerRow: some View {
         HStack {
-            // Datum
             Text(workout.date.formatted(date: .long, time: .omitted))
                 .font(.system(size: 11, weight: .regular, design: .rounded))
-                .foregroundStyle(theme.textSecondary)
-
+                .foregroundStyle(backgroundImage != nil ? .white.opacity(0.7) : theme.textSecondary)
             Spacer()
-
-            // Quelle + App-Name
             HStack(spacing: 4) {
-                Text(workout.source)
-                    .font(.system(size: 10))
+                Text(workout.source).font(.system(size: 10))
                 Text("·")
-                Text("CyclingCoach")
-                    .font(.system(size: 10, weight: .semibold))
+                Text("CyclingCoach").font(.system(size: 10, weight: .semibold))
             }
-            .foregroundStyle(theme.textSecondary)
+            .foregroundStyle(backgroundImage != nil ? .white.opacity(0.7) : theme.textSecondary)
         }
     }
 
-    // MARK: - Header Bar
+    // MARK: - Header
 
     private var headerBar: some View {
         HStack {
-            // App-Icon / Name
             HStack(spacing: 6) {
                 Image(systemName: "bicycle.circle.fill")
                     .foregroundStyle(theme.routeColor)
                     .font(.system(size: 14))
                 Text("CyclingCoach")
                     .font(.system(size: 12, weight: .semibold, design: .rounded))
-                    .foregroundStyle(theme.textSecondary)
+                    .foregroundStyle(backgroundImage != nil ? .white.opacity(0.85) : theme.textSecondary)
             }
-
             Spacer()
-
-            // Wochentag
             Text(workout.date.formatted(.dateTime.weekday(.wide)))
                 .font(.system(size: 11, weight: .medium))
-                .foregroundStyle(theme.textSecondary)
+                .foregroundStyle(backgroundImage != nil ? .white.opacity(0.85) : theme.textSecondary)
         }
         .padding(.horizontal, 18)
         .padding(.top, format == .story ? 16 : 12)
@@ -224,7 +227,7 @@ struct WorkoutShareCardView: View {
 
 private struct StatCell: View {
     let value: String
-    let unit: String
+    let unit:  String
     let label: String
     let theme: ShareTheme
 
@@ -233,7 +236,7 @@ private struct StatCell: View {
             HStack(alignment: .lastTextBaseline, spacing: 2) {
                 Text(value)
                     .font(.system(size: 20, weight: .bold, design: .rounded))
-                    .foregroundStyle(theme.textPrimary)
+                    .foregroundStyle(.white)
                 if !unit.isEmpty {
                     Text(unit)
                         .font(.system(size: 10, weight: .medium))
@@ -242,7 +245,7 @@ private struct StatCell: View {
             }
             Text(label)
                 .font(.system(size: 9, weight: .regular))
-                .foregroundStyle(theme.textSecondary)
+                .foregroundStyle(.white.opacity(0.65))
         }
     }
 }
