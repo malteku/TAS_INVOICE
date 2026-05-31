@@ -1,0 +1,158 @@
+// !$*UTF8*$!
+// Xcode-Projektdatei für CyclingCoach
+// iOS 18+ / iPhone 17 optimiert
+// Swift 6, SwiftUI, HealthKit, Charts
+//
+// Einrichtung:
+// 1. Öffne in Xcode 16+
+// 2. Wähle dein Development-Team (Signing & Capabilities)
+// 3. Aktiviere HealthKit in Capabilities
+// 4. Baue auf echtem Gerät (HealthKit nicht im Simulator verfügbar)
+
+{
+	archiveVersion = 1;
+	classes = {};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		B1000001 /* CyclingCoachApp.swift in Sources */           = {isa = PBXBuildFile; fileRef = A1000001; };
+		B1000002 /* WorkoutModels.swift in Sources */             = {isa = PBXBuildFile; fileRef = A1000002; };
+		B1000003 /* HealthKitService.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000003; };
+		B1000004 /* ClaudeService.swift in Sources */             = {isa = PBXBuildFile; fileRef = A1000004; };
+		B1000005 /* WorkoutsViewModel.swift in Sources */         = {isa = PBXBuildFile; fileRef = A1000005; };
+		B1000006 /* DashboardView.swift in Sources */             = {isa = PBXBuildFile; fileRef = A1000006; };
+		B1000007 /* WorkoutDetailView.swift in Sources */         = {isa = PBXBuildFile; fileRef = A1000007; };
+		B1000008 /* TrainingPlanView.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000008; };
+		B1000009 /* AnalysisView.swift in Sources */              = {isa = PBXBuildFile; fileRef = A1000009; };
+		B1000010 /* SettingsView.swift in Sources */              = {isa = PBXBuildFile; fileRef = A1000010; };
+		B1000011 /* WorkoutsListView.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000011; };
+		B1000012 /* MarkdownTextView.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000012; };
+		B1000013 /* Info.plist in Resources */                    = {isa = PBXBuildFile; fileRef = A1000013; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A1000001 /* CyclingCoachApp.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/CyclingCoachApp.swift"; sourceTree = "<group>"; };
+		A1000002 /* WorkoutModels.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/WorkoutModels.swift"; sourceTree = "<group>"; };
+		A1000003 /* HealthKitService.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Services/HealthKitService.swift"; sourceTree = "<group>"; };
+		A1000004 /* ClaudeService.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Services/ClaudeService.swift"; sourceTree = "<group>"; };
+		A1000005 /* WorkoutsViewModel.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/ViewModels/WorkoutsViewModel.swift"; sourceTree = "<group>"; };
+		A1000006 /* DashboardView.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/DashboardView.swift"; sourceTree = "<group>"; };
+		A1000007 /* WorkoutDetailView.swift */  = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutDetailView.swift"; sourceTree = "<group>"; };
+		A1000008 /* TrainingPlanView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/TrainingPlanView.swift"; sourceTree = "<group>"; };
+		A1000009 /* AnalysisView.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/AnalysisView.swift"; sourceTree = "<group>"; };
+		A1000010 /* SettingsView.swift */       = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/SettingsView.swift"; sourceTree = "<group>"; };
+		A1000011 /* WorkoutsListView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutsListView.swift"; sourceTree = "<group>"; };
+		A1000012 /* MarkdownTextView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Utils/MarkdownTextView.swift"; sourceTree = "<group>"; };
+		A1000013 /* Info.plist */               = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CyclingCoach/Resources/Info.plist"; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		C1000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = ();
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		D1000001 = {
+			isa = PBXGroup;
+			children = (A1000001, A1000002, A1000003, A1000004, A1000005,
+			            A1000006, A1000007, A1000008, A1000009, A1000010,
+			            A1000011, A1000012, A1000013);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E1000001 /* CyclingCoach */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F1000001;
+			buildPhases = (C1000001,);
+			buildRules = ();
+			dependencies = ();
+			name = CyclingCoach;
+			productName = CyclingCoach;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E1000000 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1600;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+					E1000001 = {
+						CreatedOnToolsVersion = 16.0;
+					};
+				};
+			};
+			buildConfigurationList = F1000000;
+			compatibilityVersion = "Xcode 15.0";
+			mainGroup = D1000001;
+			targets = (E1000001,);
+		};
+/* End PBXProject section */
+
+/* Begin XCBuildConfiguration section */
+		G1000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SWIFT_VERSION = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				INFOPLIST_FILE = "CyclingCoach/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "de.melchers.cyclingcoach";
+				PRODUCT_NAME = CyclingCoach;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		G1000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				SWIFT_VERSION = 6.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				INFOPLIST_FILE = "CyclingCoach/Resources/Info.plist";
+				PRODUCT_BUNDLE_IDENTIFIER = "de.melchers.cyclingcoach";
+				PRODUCT_NAME = CyclingCoach;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F1000000 /* Build configuration list for PBXProject */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (G1000001, G1000002);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		F1000001 /* Build configuration list for PBXNativeTarget */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (G1000001, G1000002);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+
+	};
+	rootObject = E1000000;
+}
