@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- HealthKit-Berechtigungen (Pflicht für App Store) -->
+    <key>NSHealthShareUsageDescription</key>
+    <string>CyclingCoach liest deine Rennrad-Trainings und Körperdaten aus Apple Health, um Trainingsanalysen und personalisierte Pläne zu erstellen.</string>
+
+    <key>NSHealthUpdateUsageDescription</key>
+    <string>CyclingCoach schreibt keine Daten in Health.</string>
+
+    <!-- HealthKit-Capability -->
+    <key>UIRequiredDeviceCapabilities</key>
+    <array>
+        <string>healthkit</string>
+    </array>
+
+    <!-- App-Konfiguration -->
+    <key>CFBundleDisplayName</key>
+    <string>CyclingCoach</string>
+
+    <key>CFBundleIdentifier</key>
+    <string>de.melchers.cyclingcoach</string>
+
+    <key>CFBundleShortVersionString</key>
+    <string>1.0</string>
+
+    <key>CFBundleVersion</key>
+    <string>1</string>
+
+    <key>LSRequiresIPhoneOS</key>
+    <true/>
+
+    <key>UILaunchScreen</key>
+    <dict/>
+
+    <key>UISupportedInterfaceOrientations</key>
+    <array>
+        <string>UIInterfaceOrientationPortrait</string>
+        <string>UIInterfaceOrientationLandscapeLeft</string>
+        <string>UIInterfaceOrientationLandscapeRight</string>
+    </array>
+
+    <!-- Netzwerk für Claude API -->
+    <key>NSAppTransportSecurity</key>
+    <dict>
+        <key>NSAllowsArbitraryLoads</key>
+        <false/>
+        <!-- Nur api.anthropic.com ist erlaubt -->
+    </dict>
+</dict>
+</plist>
