@@ -29,6 +29,9 @@
 		B1000011 /* WorkoutsListView.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000011; };
 		B1000012 /* MarkdownTextView.swift in Sources */          = {isa = PBXBuildFile; fileRef = A1000012; };
 		B1000013 /* Info.plist in Resources */                    = {isa = PBXBuildFile; fileRef = A1000013; };
+		B1000014 /* ChatModels.swift in Sources */                = {isa = PBXBuildFile; fileRef = A1000014; };
+		B1000015 /* ChatViewModel.swift in Sources */             = {isa = PBXBuildFile; fileRef = A1000015; };
+		B1000016 /* ChatView.swift in Sources */                  = {isa = PBXBuildFile; fileRef = A1000016; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -45,6 +48,9 @@
 		A1000011 /* WorkoutsListView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutsListView.swift"; sourceTree = "<group>"; };
 		A1000012 /* MarkdownTextView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Utils/MarkdownTextView.swift"; sourceTree = "<group>"; };
 		A1000013 /* Info.plist */               = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CyclingCoach/Resources/Info.plist"; sourceTree = "<group>"; };
+		A1000014 /* ChatModels.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/ChatModels.swift"; sourceTree = "<group>"; };
+		A1000015 /* ChatViewModel.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/ViewModels/ChatViewModel.swift"; sourceTree = "<group>"; };
+		A1000016 /* ChatView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/ChatView.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -61,7 +67,8 @@
 			isa = PBXGroup;
 			children = (A1000001, A1000002, A1000003, A1000004, A1000005,
 			            A1000006, A1000007, A1000008, A1000009, A1000010,
-			            A1000011, A1000012, A1000013);
+			            A1000011, A1000012, A1000013, A1000014, A1000015,
+			            A1000016);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */

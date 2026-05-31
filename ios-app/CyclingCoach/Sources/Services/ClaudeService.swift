@@ -144,9 +144,27 @@ class ClaudeService: ObservableObject {
         return try await sendMessage(prompt)
     }
 
-    // MARK: - Private API Call
+    // MARK: - Multi-Turn Chat (für ChatViewModel)
+
+    func sendChatMessage(
+        _ userMessage: String,
+        history: [ChatMessage],
+        systemPrompt: String
+    ) async throws -> String {
+        var apiMessages: [[String: String]] = history.map {
+            ["role": $0.role.rawValue, "content": $0.content]
+        }
+        apiMessages.append(["role": "user", "content": userMessage])
+        return try await sendMessages(apiMessages, system: systemPrompt)
+    }
+
+    // MARK: - Private API Calls
 
     private func sendMessage(_ content: String) async throws -> String {
+        try await sendMessages([["role": "user", "content": content]], system: nil)
+    }
+
+    private func sendMessages(_ messages: [[String: String]], system: String?) async throws -> String {
         guard !apiKey.isEmpty else {
             throw ClaudeError.noApiKey
         }
@@ -160,11 +178,12 @@ class ClaudeService: ObservableObject {
         request.setValue(apiKey, forHTTPHeaderField: "x-api-key")
         request.setValue(version, forHTTPHeaderField: "anthropic-version")
 
-        let body: [String: Any] = [
+        var body: [String: Any] = [
             "model": model,
             "max_tokens": 2048,
-            "messages": [["role": "user", "content": content]]
+            "messages": messages
         ]
+        if let system { body["system"] = system }
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
 
