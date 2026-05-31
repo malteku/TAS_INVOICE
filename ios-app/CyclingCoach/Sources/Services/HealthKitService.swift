@@ -231,7 +231,6 @@ class HealthKitService: ObservableObject {
         }
         return weekly.sorted { $0.key < $1.key }.map(\.value)
     }
-}
 
     // MARK: - Workout-Route (GPS)
 
@@ -270,20 +269,23 @@ class HealthKitService: ObservableObject {
         guard let route = routes.first else { throw HealthError.noData }
 
         // Schritt 3: CLLocation-Array aus Route lesen (Callback kann mehrfach kommen)
-        return try await withCheckedThrowingContinuation { continuation in
+        final class RouteState: @unchecked Sendable {
             var locations: [CLLocation] = []
-            var finished = false
+            var resumed = false
+        }
+        let state = RouteState()
+        return try await withCheckedThrowingContinuation { continuation in
             let query = HKWorkoutRouteQuery(route: route) { _, batch, done, error in
-                guard !finished else { return }
+                guard !state.resumed else { return }
                 if let error {
-                    finished = true
+                    state.resumed = true
                     continuation.resume(throwing: error)
                     return
                 }
-                if let batch { locations.append(contentsOf: batch) }
+                if let batch { state.locations.append(contentsOf: batch) }
                 if done {
-                    finished = true
-                    continuation.resume(returning: locations)
+                    state.resumed = true
+                    continuation.resume(returning: state.locations)
                 }
             }
             store.execute(query)

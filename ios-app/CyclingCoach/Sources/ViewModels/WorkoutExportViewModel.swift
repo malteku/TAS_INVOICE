@@ -124,8 +124,9 @@ class WorkoutExportViewModel: ObservableObject {
         opts.pointOfInterestFilter = .excludingAll
         opts.showsBuildings  = false
 
+        let snapshotter = MKMapSnapshotter(options: opts)
         let snapshot: MKMapSnapshotter.Snapshot = try await withCheckedThrowingContinuation { cont in
-            MKMapSnapshotter(options: opts).start(with: .global(qos: .userInitiated)) { snap, err in
+            snapshotter.start(with: .global(qos: .userInitiated)) { snap, err in
                 if let err  { cont.resume(throwing: err);   return }
                 guard let snap else {
                     cont.resume(throwing: NSError(domain: "MapSnapshot", code: -1,
