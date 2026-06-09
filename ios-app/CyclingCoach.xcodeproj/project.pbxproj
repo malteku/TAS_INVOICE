@@ -38,6 +38,10 @@
 		B1000020 /* WorkoutExportView.swift in Sources */         = {isa = PBXBuildFile; fileRef = A1000020; };
 /* End PBXBuildFile section */
 
+/* Begin PBXBuildFile section (Resources) */
+		B1000021 /* CyclingCoach.entitlements in Resources */     = {isa = PBXBuildFile; fileRef = A1000021; };
+/* End PBXBuildFile section (Resources) */
+
 /* Begin PBXFileReference section */
 		A1000001 /* CyclingCoachApp.swift */    = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/CyclingCoachApp.swift"; sourceTree = "<group>"; };
 		A1000002 /* WorkoutModels.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/WorkoutModels.swift"; sourceTree = "<group>"; };
@@ -52,6 +56,7 @@
 		A1000011 /* WorkoutsListView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/WorkoutsListView.swift"; sourceTree = "<group>"; };
 		A1000012 /* MarkdownTextView.swift */   = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Utils/MarkdownTextView.swift"; sourceTree = "<group>"; };
 		A1000013 /* Info.plist */               = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "CyclingCoach/Resources/Info.plist"; sourceTree = "<group>"; };
+		A1000021 /* CyclingCoach.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = "CyclingCoach/Resources/CyclingCoach.entitlements"; sourceTree = "<group>"; };
 		A1000014 /* ChatModels.swift */         = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Models/ChatModels.swift"; sourceTree = "<group>"; };
 		A1000015 /* ChatViewModel.swift */      = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/ViewModels/ChatViewModel.swift"; sourceTree = "<group>"; };
 		A1000016 /* ChatView.swift */           = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CyclingCoach/Sources/Views/ChatView.swift"; sourceTree = "<group>"; };
@@ -76,7 +81,8 @@
 			children = (A1000001, A1000002, A1000003, A1000004, A1000005,
 			            A1000006, A1000007, A1000008, A1000009, A1000010,
 			            A1000011, A1000012, A1000013, A1000014, A1000015,
-			            A1000016, A1000017, A1000018, A1000019, A1000020);
+			            A1000016, A1000017, A1000018, A1000019, A1000020,
+			            A1000021);
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -122,6 +128,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = "CyclingCoach/Resources/CyclingCoach.entitlements";
 				SWIFT_VERSION = 6.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				TARGETED_DEVICE_FAMILY = 1;
@@ -140,6 +147,7 @@
 				ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
 				CLANG_ENABLE_MODULES = YES;
 				CLANG_ENABLE_OBJC_ARC = YES;
+				CODE_SIGN_ENTITLEMENTS = "CyclingCoach/Resources/CyclingCoach.entitlements";
 				SWIFT_VERSION = 6.0;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.0;
 				TARGETED_DEVICE_FAMILY = 1;
